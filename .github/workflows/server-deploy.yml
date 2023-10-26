@@ -1,9 +1,9 @@
-name: Docker Compose Deploy
+name: Deploy to Remote Server
 
 on:
   push:
     branches:
-      - main  # Trigger the action when code is pushed to the main branch
+      - main  # replace with your branch name
 
 jobs:
   deploy:
@@ -13,14 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: SSH into VM
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.VM_IP }}
-        username: ${{ secrets.VM_USERNAME }}
-        key: ${{ secrets.VM_SSH_KEY }}
-        script: |
-          cd /root/personal-website/
-          git pull origin main
+    - name: Setup SSH
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
+
+    - name: Deploy to Server
+      run: |
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} <<EOF
+          cd ~/personal-website  # replace with your directory
+          git pull origin main  # replace with your branch name
           docker-compose down
           docker-compose up -d --build
+        EOF
