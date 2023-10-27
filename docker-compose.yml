@@ -13,7 +13,7 @@ services:
       - traefik.http.routers.wordpress.entrypoints=websecure
       - traefik.http.routers.wordpress.tls.certresolver=myresolver
     networks:
-      - portfolio_wp_network
+      - traefik_main_network
     volumes:
       - wordpress_data:/var/www/html
     depends_on:
@@ -26,7 +26,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - portfolio_wp_network
+      - traefik_main_network
 
   adminer:
     image: adminer
@@ -35,11 +35,12 @@ services:
       - traefik.http.routers.adminer.entrypoints=websecure
       - traefik.http.routers.adminer.tls.certresolver=myresolver
     networks:
-      - portfolio_wp_network
+      - traefik_main_network
 
 networks:
   portfolio_wp_network:
     external: true
+
 
 volumes:
   wordpress_data:
