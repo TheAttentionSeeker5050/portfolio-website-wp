@@ -37,9 +37,9 @@ services:
     networks:
       - traefik_main_network
 
-# networks:
-#   portfolio_wp_network:
-#     external: true
+networks:
+  traefik_main_network:
+    external: true
 
 
 volumes:
