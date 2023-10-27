@@ -1,47 +1,38 @@
-version: '3.1'
+version: '3'
 
 services:
   wordpress:
     image: wordpress:latest
+    container_name: my_personal_wordpress
     environment:
       WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_HOST: wp_mysql
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-    labels:
-      - traefik.http.routers.wordpress.rule=Host(`nicolas-castellano.com`)
-      - traefik.http.routers.wordpress.entrypoints=websecure
-      - traefik.http.routers.wordpress.tls.certresolver=myresolver
     networks:
-      - traefik_main_network
+      - main_network
+    ports:
+      - "8081:80"
     volumes:
       - wordpress_data:/var/www/html
     depends_on:
       - mysql
-
   mysql:
     image: mysql:5.7
+    container_name: wp_mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - traefik_main_network
-
-  adminer:
-    image: adminer
-    labels:
-      - traefik.http.routers.adminer.rule=Host(`adminer.nicolas-castellano.com`)
-      - traefik.http.routers.adminer.entrypoints=websecure
-      - traefik.http.routers.adminer.tls.certresolver=myresolver
-    networks:
-      - traefik_main_network
+      - main_network
+    
 
 networks:
-  traefik_main_network:
+  main_network:
     external: true
-
 
 volumes:
   wordpress_data:
   mysql_data:
+
