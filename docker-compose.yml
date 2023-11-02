@@ -10,7 +10,7 @@ services:
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
     networks:
-      - main_network
+      - portfolio_wp_network
     ports:
       - "8081:80"
     volumes:
@@ -25,11 +25,15 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - main_network
+      - portfolio_wp_network
+    # ports:
+    #   - 3306:3306
+  
+
     
 
 networks:
-  main_network:
+  portfolio_wp_network:
     external: true
 
 volumes:
