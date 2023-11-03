@@ -1,43 +1,66 @@
-version: '3.1'
+version: '3'
 
 services:
+  db:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MYSQL_DATABASE=wordpress
+    volumes: 
+      - personal_wp_dbdata:/var/lib/mysql
+    command: '--default-authentication-plugin=mysql_native_password'
+    networks:
+      - personal_wp_site_network
+
   wordpress:
-    image: wordpress
-    restart: always
-    container_name: my_personal_wordpress
-    ports:
-      - "8081:80"
-    env_file:
-      - .env
+    depends_on: 
+      - db
+    image: wordpress:5.1.1-fpm-alpine
+    container_name: wordpress
+    restart: unless-stopped
+    env_file: .env
     environment:
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DB_USER: nicolas
-      WORDPRESS_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=$MYSQL_USER
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+      - WORDPRESS_DB_NAME=wordpress
     volumes:
-      - ./portfolio_website_wp_data:/var/www/html
+      - personal_wp:/var/www/html
+    networks:
+      - personal_wp_site_network
+
+  webserver:
     depends_on:
-      - mysql
-    
-
-
-  mysql:
-    image: mysql:5.7
-    container_name: wp_mysql
-    environment:
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: nicolas
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      # MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      # MYSQL_RANDOM_ROOT_PASSWORD: '1'
-    volumes:
-      - ./portfolio_website_db_data:/var/lib/mysql
+      - wordpress
+    image: nginx:1.15.12-alpine
+    container_name: webserver
+    restart: unless-stopped
     ports:
-      - 3308:3306
-    
-  
+      - "81:80"
+    volumes:
+      - personal_wp:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - personal_wp_certbot_etc:/etc/letsencrypt
+    networks:
+      - personal_wp_site_network
+      
+  certbot:
+    depends_on:
+      - webserver
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - personal_wp_certbot_etc:/etc/letsencrypt
+      - personal_wp:/var/www/html
+    # command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email -d nicolas-castellano.com -d www.nicolas-castellano.com
+    command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email --staging -d nicolas-castellano.com -d www.nicolas-castellano.com
 volumes:
-  wordpress_data:
-  mysql_data:
+  personal_wp_certbot_etc:
+  personal_wp:
+  personal_wp_dbdata:
 
+networks:
+  personal_wp_site_network:
+    driver: bridge  
