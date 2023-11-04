@@ -43,6 +43,8 @@ services:
       - personal_wp:/var/www/html
       - ./nginx-conf:/etc/nginx/conf.d
       - personal_wp_certbot_etc:/etc/letsencrypt
+      - /etc/ssl/certs/dhparam.pem:/etc/ssl/certs/dhparam.pem
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
     networks:
       - personal_wp_site_network
       
@@ -54,8 +56,11 @@ services:
     volumes:
       - personal_wp_certbot_etc:/etc/letsencrypt
       - personal_wp:/var/www/html
-    # command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email -d nicolas-castellano.com -d www.nicolas-castellano.com
-    command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email --staging -d nicolas-castellano.com -d www.nicolas-castellano.com
+    command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email --force-renewal -d nicolas-castellano.com -d www.nicolas-castellano.com # step 3 command for --force renewal option
+    # command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email -d nicolas-castellano.com -d www.nicolas-castellano.com # step 2 this command 
+    # command: certonly --webroot --webroot-path=/var/www/html --email nicolas.castellano.6@gmail.com --agree-tos --no-eff-email --staging -d nicolas-castellano.com -d www.nicolas-castellano.com # set cert staging command, this is step 1 before getting the cert
+    # certificate docker volume is saved on host machine as: 
+    # /var/lib/docker/volumes/portfolio-website-wp_personal_wp_certbot_etc/_data/live/nicolas-castellano.com/ 
 volumes:
   personal_wp_certbot_etc:
   personal_wp:
