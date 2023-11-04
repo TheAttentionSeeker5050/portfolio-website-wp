@@ -2,7 +2,7 @@
 
 # README for Docker Compose Deployment of WordPress
 ## Overview
-This README outlines the deployment process for a WordPress site using Docker Compose, which includes services for MySQL, WordPress, Nginx, and Certbot for SSL certificate management.
+This README outlines the deployment process for a WordPress site using Docker Compose, which includes services for MySQL, WordPress, Nginx, and Certbot for SSL certificate management.I also used GitHub Actions for automated deployment on commit my main branch.
 
 ## Prerequisites
 - Docker and Docker Compose installed on your host machine.
