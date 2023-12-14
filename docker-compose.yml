@@ -1,31 +1,32 @@
 version: '3'
 
 services:
-  db:
-    image: mysql:8.0
-    container_name: db
-    restart: unless-stopped
-    env_file: .env
-    environment:
-      - MYSQL_DATABASE=wordpress
-    volumes: 
-      - personal_wp_dbdata:/var/lib/mysql
-    command: '--default-authentication-plugin=mysql_native_password'
-    networks:
-      - personal_wp_site_network
+  # db:
+  #   image: mysql:8.0
+  #   container_name: db
+  #   restart: unless-stopped
+  #   env_file: .env
+  #   environment:
+  #     - MYSQL_DATABASE=wordpress
+  #   volumes: 
+  #     - personal_wp_dbdata:/var/lib/mysql
+  #     - ./mysql-data-backup:/var/lib/mysql
+  #   command: '--default-authentication-plugin=mysql_native_password'
+  #   networks:
+  #     - personal_wp_site_network
 
   wordpress:
-    depends_on: 
-      - db
+    # depends_on: 
+    #   - db
     image: wordpress:5.1.1-fpm-alpine
     container_name: wordpress
     restart: unless-stopped
     env_file: .env
     environment:
-      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_HOST=db:3399
       - WORDPRESS_DB_USER=$MYSQL_USER
       - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
-      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DB_NAME=my_portfolio_wordpress
     volumes:
       - personal_wp:/var/www/html
     networks:
@@ -35,7 +36,7 @@ services:
     depends_on:
       - wordpress
     image: nginx:1.15.12-alpine
-    container_name: webserver
+    container_name: webserver-2
     restart: unless-stopped
     ports:
       - "81:80"
@@ -47,6 +48,15 @@ services:
       - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
     networks:
       - personal_wp_site_network
+
+  # adminer:
+  #   image: adminer
+  #   container_name: my-adminer-2
+  #   restart: always
+  #   ports:
+  #     - 8035:8080
+  #   networks:
+  #     - personal_wp_site_network
       
   certbot:
     depends_on:
@@ -64,7 +74,7 @@ services:
 volumes:
   personal_wp_certbot_etc:
   personal_wp:
-  personal_wp_dbdata:
+  # personal_wp_dbdata:
 
 networks:
   personal_wp_site_network:
